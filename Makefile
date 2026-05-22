@@ -9,6 +9,17 @@ up:
 	cp -n .env.example .env || true
 	docker compose up -d --build
 
+# FOR WINDOWS USERS
+
+#setup:
+	#powershell -NoProfile -Command "if (!(Test-Path .env)) { Copy-Item .env.example .env }"
+	#python -m pip install --upgrade pip
+	#python -m pip install -e ".[dev,ingestion]"
+
+#up:
+	#powershell -NoProfile -Command "if (!(Test-Path .env)) { Copy-Item .env.example .env }"
+	#docker compose up -d --build
+
 down:
 	docker compose down
 
