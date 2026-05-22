@@ -1,0 +1,16 @@
+[
+  {
+    "id": "triple_001",
+    "subject": "Agentic GraphRAG",
+    "predicate": "combines",
+    "object": "knowledge graph and vector search",
+    "confidence": 0.91
+  },
+  {
+    "id": "triple_002",
+    "subject": "Faithfulness evaluation",
+    "predicate": "checks",
+    "object": "answer support against retrieved context",
+    "confidence": 0.89
+  }
+]

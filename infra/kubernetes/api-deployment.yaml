@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agentic-graphrag-api
+  namespace: agentic-graphrag
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: agentic-graphrag-api
+  template:
+    metadata:
+      labels:
+        app: agentic-graphrag-api
+    spec:
+      containers:
+        - name: api
+          image: agentic-graphrag-api:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: agentic-graphrag-config
+            - secretRef:
+                name: agentic-graphrag-secrets
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 20
+            periodSeconds: 30

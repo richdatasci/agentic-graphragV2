@@ -1,0 +1,5 @@
+Agentic GraphRAG is a production architecture pattern that combines multimodal ingestion,
+a knowledge graph, vector search, multi-agent orchestration and faithfulness evaluation.
+
+The graph database stores entities, relationships, claims, triples and document lineage.
+The vector database stores semantic embeddings for chunks, tables, images and extracted claims.

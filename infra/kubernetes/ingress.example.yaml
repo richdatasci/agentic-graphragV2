@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: agentic-graphrag-ingress
+  namespace: agentic-graphrag
+spec:
+  rules:
+    - host: graphrag.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: agentic-graphrag-api
+                port:
+                  number: 8000

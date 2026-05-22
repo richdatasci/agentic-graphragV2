@@ -1,0 +1,223 @@
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #e5e7eb;
+  background: #09090b;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(59, 130, 246, 0.22), transparent 30rem),
+    radial-gradient(circle at top right, rgba(168, 85, 247, 0.16), transparent 28rem),
+    #09090b;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.app-shell {
+  width: min(1440px, 100%);
+  margin: 0 auto;
+  padding: 32px;
+}
+
+.app-header {
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 24px;
+  padding: 32px;
+  margin-bottom: 24px;
+  background: rgba(15, 23, 42, 0.78);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: #93c5fd;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 12px;
+  font-size: clamp(2rem, 4vw, 4rem);
+}
+
+h2 {
+  margin-bottom: 16px;
+  font-size: 1.1rem;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 16px;
+}
+
+.panel {
+  grid-column: span 4;
+  min-height: 300px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 22px;
+  background: rgba(15, 23, 42, 0.72);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+}
+
+.panel-large {
+  grid-column: span 8;
+  grid-row: span 2;
+}
+
+.panel-wide {
+  grid-column: span 8;
+}
+
+.card-content {
+  padding: 20px;
+}
+
+.muted {
+  color: #94a3b8;
+}
+
+.stack {
+  display: grid;
+  gap: 12px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  border: 1px solid rgba(147, 197, 253, 0.28);
+  border-radius: 999px;
+  padding: 4px 10px;
+  color: #bfdbfe;
+  background: rgba(37, 99, 235, 0.12);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.input-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.input-row input {
+  flex: 1;
+  border: 1px solid rgba(148, 163, 184, 0.32);
+  border-radius: 14px;
+  padding: 12px 14px;
+  color: #e5e7eb;
+  background: rgba(2, 6, 23, 0.7);
+}
+
+.input-row button {
+  border: 0;
+  border-radius: 14px;
+  padding: 12px 16px;
+  color: white;
+  background: #2563eb;
+  font-weight: 700;
+}
+
+.trace-item,
+.evidence-item,
+.triple-item {
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 16px;
+  padding: 14px;
+  background: rgba(2, 6, 23, 0.42);
+}
+
+.metric {
+  display: grid;
+  gap: 6px;
+}
+
+.metric-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.progress {
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.2);
+  overflow: hidden;
+}
+
+.progress > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #60a5fa, #a78bfa);
+}
+
+.graph-canvas {
+  height: 360px;
+  border-radius: 18px;
+  border: 1px dashed rgba(148, 163, 184, 0.28);
+  background:
+    linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+    rgba(2, 6, 23, 0.34);
+  background-size: 24px 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.graph-node {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 104px;
+  min-height: 48px;
+  padding: 8px;
+  border: 1px solid rgba(147, 197, 253, 0.5);
+  border-radius: 999px;
+  color: #dbeafe;
+  background: rgba(37, 99, 235, 0.34);
+  text-align: center;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+@media (max-width: 1100px) {
+  .panel,
+  .panel-large,
+  .panel-wide {
+    grid-column: span 12;
+  }
+
+  .app-shell {
+    padding: 16px;
+  }
+}

@@ -1,0 +1,12 @@
+services:
+  api:
+    environment:
+      LOG_LEVEL: DEBUG
+    volumes:
+      - ./:/app
+
+  worker:
+    environment:
+      LOG_LEVEL: DEBUG
+    volumes:
+      - ./:/app

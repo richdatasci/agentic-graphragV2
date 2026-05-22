@@ -1,0 +1,69 @@
+{
+  "title": "Agentic GraphRAG Overview",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "API Request Latency",
+      "targets": [
+        {
+          "expr": "http_request_duration_seconds_bucket"
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Faithfulness Score",
+      "targets": [
+        {
+          "expr": "graphrag_faithfulness_score"
+        }
+      ],
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Worker Jobs",
+      "targets": [
+        {
+          "expr": "celery_tasks_total"
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Unsupported Claims",
+      "targets": [
+        {
+          "expr": "graphrag_unsupported_claims_total"
+        }
+      ],
+      "gridPos": {
+        "x": 12,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      }
+    }
+  ]
+}

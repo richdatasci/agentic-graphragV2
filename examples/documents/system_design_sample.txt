@@ -1,0 +1,5 @@
+The production system uses FastAPI for the API layer, Celery for asynchronous workers, Redis for queueing, Postgres for metadata, Neo4j for graph storage, Qdrant for vector search, MinIO for object storage and Ollama for local model serving.
+
+The frontend is a React and TypeScript interface with panels for chat, evidence, decision trace, graph visualisation, triples preview and evaluation metrics.
+
+The deployment can run locally with Docker Compose and can later be deployed to Kubernetes using the infrastructure manifests.

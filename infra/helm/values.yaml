@@ -1,0 +1,25 @@
+image:
+  repository: agentic-graphrag-api
+  tag: latest
+  pullPolicy: IfNotPresent
+
+api:
+  replicas: 2
+  port: 8000
+
+worker:
+  replicas: 2
+
+config:
+  environment: production
+  logLevel: INFO
+  redisUrl: redis://redis:6379/0
+  neo4jUri: bolt://neo4j:7687
+  qdrantUrl: http://qdrant:6333
+  ollamaBaseUrl: http://ollama:11434
+
+secrets:
+  openaiApiKey: "INSERT API KEY HERE"
+  anthropicApiKey: "INSERT API KEY HERE"
+  qdrantApiKey: "INSERT API KEY HERE"
+  neo4jPassword: "agentic-graphrag-password"
