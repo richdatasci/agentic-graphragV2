@@ -66,7 +66,9 @@ class ModelGateway:
             return self._fallback_completion(prompt)
 
     def _fallback_completion(self, prompt: str) -> str:
-        return (
-            "The model gateway is configured but no live model response was available. "
-            "The system would answer using the retrieved context and then run faithfulness evaluation."
-        )
+        return self.UNAVAILABLE_RESPONSE
+
+    UNAVAILABLE_RESPONSE = (
+        "The model gateway is configured but no live model response was available. "
+        "The system would answer using the retrieved context and then run faithfulness evaluation."
+    )

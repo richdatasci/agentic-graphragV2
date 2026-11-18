@@ -1,7 +1,7 @@
-from pathlib import Path
 from pydantic import BaseModel, Field
 
 from graphrag_system.llm.embedding_gateway import EmbeddingGateway
+from graphrag_system.storage.vector.base import BaseVectorStore
 from graphrag_system.storage.vector.local_store import LocalJsonVectorStore
 
 
@@ -16,33 +16,32 @@ class RetrievedEvidence(BaseModel):
 
 
 class VectorRetriever:
-    def __init__(self) -> None:
-        self.embedder = EmbeddingGateway()
-        self.store = LocalJsonVectorStore()
+    def __init__(
+        self, store: BaseVectorStore | None = None, embedder: EmbeddingGateway | None = None,
+    ) -> None:
+        self.embedder = embedder or EmbeddingGateway()
+        self.store = store or LocalJsonVectorStore()
 
     def retrieve(self, query: str, top_k: int = 8) -> list[RetrievedEvidence]:
-        if not Path(".local_data/vector_records.json").exists():
-            return [
-                RetrievedEvidence(
-                    source_id="vector_placeholder",
-                    chunk_id="chunk_placeholder",
-                    title="Vector retrieval placeholder",
-                    text=f"Vector retrieval is ready. Run `make ingest-sample` to index sample content. Query: {query}",
-                    score=0.5,
-                    source_type="vector",
-                )
-            ]
+        if isinstance(self.store, LocalJsonVectorStore) and not self.store.path.exists():
+            return []
         query_vector = self.embedder.embed_text(query)
         results = self.store.search(query_vector, top_k=top_k)
-        return [
-            RetrievedEvidence(
-                source_id=r["payload"].get("metadata", {}).get("document_id", r["id"]),
-                chunk_id=r["id"],
-                title=r["payload"].get("metadata", {}).get("title", "Indexed chunk"),
-                text=r["payload"]["text"],
-                score=float(r["score"]),
+        evidence = []
+        for row in results:
+            payload = row["payload"] or {}
+            if not isinstance(payload.get("text"), str) or not row["score"] > 0:
+                continue
+            metadata = payload.get("metadata")
+            if not isinstance(metadata, dict):
+                metadata = payload
+            evidence.append(RetrievedEvidence(
+                source_id=metadata.get("document_id") or row["id"],
+                chunk_id=metadata.get("chunk_id") or row["id"],
+                title=metadata.get("title") or "Indexed chunk",
+                text=payload["text"],
+                score=float(row["score"]),
                 source_type="vector",
-                metadata=r["payload"].get("metadata", {}),
-            )
-            for r in results
-        ]
+                metadata=metadata,
+            ))
+        return evidence

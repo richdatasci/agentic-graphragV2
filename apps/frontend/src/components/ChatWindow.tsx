@@ -1,26 +1,48 @@
 import { SendHorizonal } from "lucide-react";
 import { FormEvent, useState } from "react";
+import type { DecisionTraceItem } from "./DecisionTracePanel";
+import type { GraphPreview } from "./GraphViewer";
 
 type ChatMessage = {
   role: "user" | "assistant";
   content: string;
 };
 
-export function ChatWindow() {
+export type ChatRun = {
+  session_id: string;
+  answer: string;
+  decision_trace: DecisionTraceItem[];
+  evidence: {
+    citation: string;
+    source_id: string;
+    source_type: string;
+    title: string | null;
+    score: number | null;
+  }[];
+  graph_preview: GraphPreview | null;
+  faithfulness_score: number | null;
+  answer_relevance: number | null;
+  unsupported_claims: string[];
+};
+
+export function ChatWindow({ onRun }: { onRun: (run: ChatRun) => void }) {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: "assistant",
       content:
-        "Ask a question and this panel will call the Agentic GraphRAG API once the backend services are wired."
+        "Ask a question about your indexed documents."
     }
   ]);
   const [query, setQuery] = useState("");
+  const [sessionId, setSessionId] = useState<string | undefined>();
+  const [submitting, setSubmitting] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const trimmed = query.trim();
-    if (!trimmed) return;
+    if (!trimmed || submitting) return;
+    setSubmitting(true);
 
     setMessages((current) => [...current, { role: "user", content: trimmed }]);
     setQuery("");
@@ -33,6 +55,7 @@ export function ChatWindow() {
         },
         body: JSON.stringify({
           query: trimmed,
+          session_id: sessionId,
           include_decision_trace: true,
           include_graph_preview: true
         })
@@ -42,7 +65,9 @@ export function ChatWindow() {
         throw new Error(`API returned ${response.status}`);
       }
 
-      const data = await response.json();
+      const data: ChatRun = await response.json();
+      setSessionId(data.session_id);
+      onRun(data);
 
       setMessages((current) => [
         ...current,
@@ -51,7 +76,7 @@ export function ChatWindow() {
           content: data.answer ?? "No answer returned."
         }
       ]);
-    } catch (error) {
+    } catch {
       setMessages((current) => [
         ...current,
         {
@@ -60,6 +85,8 @@ export function ChatWindow() {
             "The frontend is running, but the API is not reachable yet. Start the FastAPI service or check the Vite proxy."
         }
       ]);
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -84,7 +111,7 @@ export function ChatWindow() {
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Ask about a document, system, graph relationship or decision..."
         />
-        <button type="submit" aria-label="Send message">
+        <button type="submit" disabled={submitting} aria-label="Send message">
           <SendHorizonal size={18} />
         </button>
       </form>

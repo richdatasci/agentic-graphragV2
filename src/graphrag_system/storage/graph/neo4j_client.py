@@ -2,7 +2,7 @@ from contextlib import contextmanager
 from typing import Any, Iterator
 
 try:
-    from neo4j import GraphDatabase
+    from neo4j import READ_ACCESS, GraphDatabase, Query
 except Exception:
     GraphDatabase = None
 
@@ -26,4 +26,8 @@ class Neo4jClient:
             return [record.data() for record in result]
 
     def execute_read(self, query: str, parameters: dict[str, Any]) -> list[dict[str, Any]]:
-        return self.execute_write(query, parameters)
+        if not self.driver:
+            return []
+        with self.driver.session(default_access_mode=READ_ACCESS) as session:
+            result = session.run(Query(query, timeout=5), parameters)
+            return [record.data() for record in result]

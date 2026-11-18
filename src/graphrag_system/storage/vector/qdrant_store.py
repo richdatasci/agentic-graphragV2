@@ -31,12 +31,11 @@ class QdrantVectorStore(BaseVectorStore):
 
     def search(self, vector: list[float], top_k: int = 8) -> list[dict]:
         if not self.client:
-            return []
-        try:
+            raise RuntimeError("Qdrant is unavailable.")
+        if hasattr(self.client, "query_points"):
+            results = self.client.query_points(
+                collection_name=self.collection_name, query=vector, limit=top_k, timeout=5,
+            ).points
+        else:
             results = self.client.search(collection_name=self.collection_name, query_vector=vector, limit=top_k)
-        except Exception:
-            try:
-                results = self.client.query_points(collection_name=self.collection_name, query=vector, limit=top_k).points
-            except Exception:
-                return []
-        return [{"id": str(r.id), "score": r.score, "payload": r.payload} for r in results]
+        return [{"id": str(result.id), "score": result.score, "payload": result.payload} for result in results]

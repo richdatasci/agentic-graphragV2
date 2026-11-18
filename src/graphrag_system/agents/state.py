@@ -1,4 +1,5 @@
-from typing import Any, Literal
+from dataclasses import dataclass, field
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -15,6 +16,7 @@ class DecisionPoint(BaseModel):
 class AgentRunResult(BaseModel):
     session_id: str
     final_answer: str
+    run_id: str = ""
     evidence: list[RetrievedEvidence] = Field(default_factory=list)
     decision_trace: list[DecisionPoint] = Field(default_factory=list)
     faithfulness_score: float | None = None
@@ -22,16 +24,20 @@ class AgentRunResult(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
-class AgentState(BaseModel):
+@dataclass
+class AgentState:
     session_id: str
     user_query: str
-    rewritten_query: str | None = None
-    intent: str | None = None
-    retrieval_strategy: Literal["vector", "graph", "keyword", "hybrid", "tool_augmented"] = "hybrid"
-    evidence: list[RetrievedEvidence] = Field(default_factory=list)
-    decision_trace: list[DecisionPoint] = Field(default_factory=list)
-    draft_answer: str | None = None
-    final_answer: str | None = None
-    faithfulness_score: float | None = None
-    unsupported_claims: list[str] = Field(default_factory=list)
-    tool_calls: list[dict[str, Any]] = Field(default_factory=list)
+    roles: list[str] = field(default_factory=lambda: ["viewer"])
+    history: list[dict[str, str]] = field(default_factory=list)
+    rewritten_query: str = ""
+    retrieval_strategy: str = "hybrid"
+    evidence: list[RetrievedEvidence] = field(default_factory=list)
+    context: str = ""
+    decision_trace: list[DecisionPoint] = field(default_factory=list)
+    draft_answer: str = ""
+    final_answer: str = ""
+    evaluation: dict = field(default_factory=dict)
+    tool_calls: list[dict[str, Any]] = field(default_factory=list)
+    backends: dict[str, str] = field(default_factory=dict)
+    attempts: int = 0

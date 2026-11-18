@@ -1,12 +1,14 @@
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import AsyncIterator
+from typing import Annotated
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.responses import JSONResponse
 
 from apps.api.dependencies import AppContainer, get_app_container
 from apps.api.middleware import register_middleware
 from apps.api.routers import admin, chat, documents, evaluation, graph, ingestion, triples
+from graphrag_system.config.logging import configure_logging
 
 APP_NAME = "Agentic GraphRAG API"
 APP_VERSION = "0.1.0"
@@ -15,6 +17,7 @@ APP_VERSION = "0.1.0"
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     container = get_app_container()
+    configure_logging(container.settings.log_level)
     app.state.container = container
     await container.startup()
     try:
@@ -58,7 +61,7 @@ def create_app() -> FastAPI:
         )
 
     @app.get("/health", tags=["system"])
-    async def health(container: AppContainer = get_app_container()) -> JSONResponse:
+    async def health(container: Annotated[AppContainer, Depends(get_app_container)]) -> JSONResponse:
         return JSONResponse(
             {
                 "status": "ok",
@@ -69,7 +72,7 @@ def create_app() -> FastAPI:
         )
 
     @app.get("/ready", tags=["system"])
-    async def readiness(container: AppContainer = get_app_container()) -> JSONResponse:
+    async def readiness(container: Annotated[AppContainer, Depends(get_app_container)]) -> JSONResponse:
         report = await container.readiness_check()
         return JSONResponse(report, status_code=200 if report["ready"] else 503)
 

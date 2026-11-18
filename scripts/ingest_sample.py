@@ -23,7 +23,11 @@ def load_sample_docs() -> list[ParsedDocument]:
                 title=path.name,
                 text=text,
                 source_type="sample",
-                metadata={"title": path.name, "path": str(path)},
+                metadata={
+                    "title": path.name, "path": str(path),
+                    "source_allowed_roles": ["viewer", "analyst", "admin"],
+                    "document_allowed_roles": ["viewer", "analyst", "admin"],
+                },
             )
         )
     return docs
@@ -53,6 +57,7 @@ def main() -> int:
                     vector=embedder.embed_text(chunk.text),
                     text=chunk.text,
                     metadata={
+                        **chunk.metadata,
                         "document_id": document.document_id,
                         "title": document.title,
                         "chunk_index": chunk.index,
@@ -67,6 +72,7 @@ def main() -> int:
         for triple in triples:
             payload = triple.model_dump()
             payload["source_document_id"] = document.document_id
+            payload["metadata"].update(document.metadata)
             payload["chunk_id"] = chunks[0].id if chunks else None
             all_triples.append(payload)
 
