@@ -56,3 +56,18 @@ GET /admin/status
 GET /admin/config
 GET /admin/metrics
 ```
+
+## Chat response and session
+
+`POST /chat` accepts an optional UUIDv4 `session_id`. Omit it for a new
+session and reuse the returned ID for follow-up turns. Keep session IDs
+private. Responses include a `run_id`, citation-labelled evidence and
+faithfulness and relevance scores when the evaluator ran. Set
+`include_decision_trace` or `include_graph_preview` to false to omit those
+parts of the chat response.
+
+Send the session ID in the `X-Session-ID` header on trace requests. The trace
+includes routing and backend outcomes, approved tool calls, evidence identifiers,
+and evaluator results. History and trace requests use the same authentication
+as chat. History and traces expire when purged from the process cache or when
+the API process restarts.

@@ -1,4 +1,30 @@
+from graphrag_system.retrieval.vector_retriever import RetrievedEvidence
+from graphrag_system.utils.hashing import stable_hash
+
+
 class SubgraphBuilder:
+    def from_evidence(self, evidence: list[RetrievedEvidence]) -> dict | None:
+        nodes = {}
+        edges = {}
+        for index, item in enumerate(evidence, start=1):
+            if item.source_type != "graph":
+                continue
+            subject = item.metadata.get("subject")
+            predicate = item.metadata.get("predicate")
+            target = item.metadata.get("object")
+            if not all((subject, predicate, target)):
+                continue
+            source_id, target_id = stable_hash(subject), stable_hash(target)
+            nodes[source_id] = {"id": source_id, "label": subject, "type": "Entity"}
+            nodes[target_id] = {"id": target_id, "label": target, "type": "Entity"}
+            edge_id = stable_hash(f"{source_id}:{predicate}:{target_id}")
+            edge = edges.setdefault(edge_id, {
+                "id": edge_id, "source": source_id, "target": target_id,
+                "type": predicate, "citations": [],
+            })
+            edge["citations"].append(f"Source {index}")
+        return {"nodes": list(nodes.values()), "edges": list(edges.values())} if edges else None
+
     def placeholder_neighbourhood(self, entity_id: str, depth: int = 1) -> dict:
         return {
             "nodes": [

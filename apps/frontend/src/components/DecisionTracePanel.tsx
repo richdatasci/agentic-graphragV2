@@ -1,4 +1,4 @@
-type DecisionTraceItem = {
+export type DecisionTraceItem = {
   step: string;
   decision: string;
   reason: string;
@@ -12,15 +12,12 @@ type DecisionTracePanelProps = {
 export function DecisionTracePanel({ items }: DecisionTracePanelProps) {
   return (
     <div className="card-content">
-      <div className="badge">Decision Trace</div>
-      <h2>Safe Explainability</h2>
-      <p className="muted">
-        Shows structured routing and tool-use decisions, not hidden chain-of-thought.
-      </p>
+      <h2>Decision Trace</h2>
+      {items.length === 0 && <p className="muted">No run to display.</p>}
 
       <div className="stack">
-        {items.map((item) => (
-          <article key={`${item.step}-${item.decision}`} className="trace-item">
+        {items.map((item, index) => (
+          <article key={`${item.step}-${index}`} className="trace-item">
             <strong>{item.step}</strong>
             <p style={{ marginBottom: 6 }}>{item.decision}</p>
             <p className="muted" style={{ marginBottom: 8 }}>{item.reason}</p>

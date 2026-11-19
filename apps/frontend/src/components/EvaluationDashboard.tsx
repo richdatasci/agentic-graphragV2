@@ -1,8 +1,7 @@
 type EvaluationDashboardProps = {
-  faithfulnessScore: number;
-  contextPrecision: number;
-  contextRecall: number;
-  answerRelevance: number;
+  faithfulnessScore: number | null;
+  answerRelevance: number | null;
+  unsupportedClaims: string[];
 };
 
 function MetricBar({ label, value }: { label: string; value: number }) {
@@ -23,20 +22,23 @@ function MetricBar({ label, value }: { label: string; value: number }) {
 
 export function EvaluationDashboard({
   faithfulnessScore,
-  contextPrecision,
-  contextRecall,
-  answerRelevance
+  answerRelevance,
+  unsupportedClaims
 }: EvaluationDashboardProps) {
   return (
     <div className="card-content">
-      <div className="badge">Evaluation</div>
-      <h2>RAG Quality Metrics</h2>
+      <h2>Answer Evaluation</h2>
 
       <div className="stack">
-        <MetricBar label="Faithfulness" value={faithfulnessScore} />
-        <MetricBar label="Context precision" value={contextPrecision} />
-        <MetricBar label="Context recall" value={contextRecall} />
-        <MetricBar label="Answer relevance" value={answerRelevance} />
+        {faithfulnessScore === null && <p className="muted">No evaluation to display.</p>}
+        {faithfulnessScore !== null && <MetricBar label="Faithfulness" value={faithfulnessScore} />}
+        {answerRelevance !== null && <MetricBar label="Answer relevance" value={answerRelevance} />}
+        {unsupportedClaims.length > 0 && (
+          <div>
+            <strong>Unsupported draft claims</strong>
+            <ul>{unsupportedClaims.map((claim, index) => <li key={index}>{claim}</li>)}</ul>
+          </div>
+        )}
       </div>
     </div>
   );

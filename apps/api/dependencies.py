@@ -1,7 +1,7 @@
-from functools import lru_cache
-from typing import Any
+from functools import cached_property, lru_cache
+from typing import Any, Literal
 
-from pydantic import Field
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -17,6 +17,9 @@ class Settings(BaseSettings):
     log_level: str = Field(default="INFO", alias="LOG_LEVEL")
     api_host: str = Field(default="0.0.0.0", alias="API_HOST")
     api_port: int = Field(default=8000, alias="API_PORT")
+    chat_graph_backend: Literal["local", "neo4j"] = Field(default="local", alias="CHAT_GRAPH_BACKEND")
+    chat_vector_backend: Literal["local", "qdrant"] = Field(default="local", alias="CHAT_VECTOR_BACKEND")
+    chat_api_key: SecretStr | None = Field(default=None, alias="CHAT_API_KEY")
     cors_allow_origins: str = Field(default="*", alias="CORS_ALLOW_ORIGINS")
 
     postgres_host: str = Field(default="localhost", alias="POSTGRES_HOST")
@@ -78,11 +81,51 @@ class AppContainer:
         self.settings = settings
         self.services: dict[str, Any] = {}
 
+    @cached_property
+    def chat_service(self):
+        from apps.api.routers.chat import ChatService
+        from graphrag_system.agents.supervisor import SupervisorAgent
+        from graphrag_system.llm.embedding_gateway import EmbeddingGateway
+        from graphrag_system.llm.model_gateway import ModelGateway
+        from graphrag_system.retrieval.graph_retriever import GraphRetriever
+        from graphrag_system.retrieval.hybrid_retriever import HybridRetriever
+        from graphrag_system.retrieval.vector_retriever import VectorRetriever
+        from graphrag_system.storage.graph.neo4j_client import Neo4jClient
+        from graphrag_system.storage.vector.qdrant_store import QdrantVectorStore
+
+        settings = self.settings
+        graph_client = None
+        vector_store = None
+        if settings.chat_graph_backend == "neo4j":
+            graph_client = Neo4jClient(
+                settings.neo4j_uri, settings.neo4j_user, settings.neo4j_password,
+            )
+            self.services["chat_graph_client"] = graph_client
+        if settings.chat_vector_backend == "qdrant":
+            vector_store = QdrantVectorStore(
+                settings.qdrant_url, settings.qdrant_collection, settings.qdrant_api_key,
+            )
+            self.services["chat_vector_store"] = vector_store
+        retrieval = HybridRetriever(
+            graph=GraphRetriever(graph_client),
+            vector=VectorRetriever(
+                vector_store, EmbeddingGateway(settings.default_embedding_model, settings.vector_size),
+            ),
+        )
+        return ChatService(SupervisorAgent(ModelGateway.from_settings(settings), retrieval))
+
     async def startup(self) -> None:
         self.services["started"] = True
 
     async def shutdown(self) -> None:
+        graph_client = self.services.get("chat_graph_client")
+        if graph_client:
+            graph_client.close()
+        vector_store = self.services.get("chat_vector_store")
+        if vector_store and vector_store.client:
+            vector_store.client.close()
         self.services.clear()
+        self.__dict__.pop("chat_service", None)
 
     async def readiness_check(self) -> dict[str, Any]:
         return {
